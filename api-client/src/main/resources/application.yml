@@ -1,0 +1,5 @@
+externalApi:
+  url: http://localhost:8123
+  path: /api/v1/resource
+  apiKeyHeaderName: X-API-KEY
+  apiKey: someKey
