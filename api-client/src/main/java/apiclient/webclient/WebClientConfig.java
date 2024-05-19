@@ -14,10 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
@@ -52,25 +49,25 @@ public class WebClientConfig {
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             // Error handler
-            .filter(errorHandler())
+            .filter(ExchangeFilterFunction.ofResponseProcessor(this::errorHandler))
             // Auth
-            .filter((request, next) -> {
-                var newRequest = ClientRequest.from(request)
-                    .headers(apiKeyService::setApiKeyHeader)
-                    .build();
-                return next.exchange(newRequest);
-            })
+            .filter(ExchangeFilterFunction.ofRequestProcessor(request -> authInjector(request, apiKeyService)))
             .build();
     }
 
-    private ExchangeFilterFunction errorHandler() {
-        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            if (HttpStatus.BAD_REQUEST.equals(clientResponse.statusCode())) {
-                return clientResponse
-                    .bodyToMono(ErrorResponseDto.class)
-                    .flatMap(responseDto -> Mono.error(new ErrorResponseException(responseDto)));
-            }
-            return Mono.just(clientResponse);
-        });
+    private Mono<ClientRequest> authInjector(ClientRequest clientRequest, ApiKeyService apiKeyService) {
+        var request = ClientRequest.from(clientRequest)
+            .headers(apiKeyService::setApiKeyHeader)
+            .build();
+        return Mono.just(request);
+    }
+
+    private Mono<ClientResponse> errorHandler(ClientResponse clientResponse) {
+        if (HttpStatus.BAD_REQUEST.equals(clientResponse.statusCode())) {
+            return clientResponse
+                .bodyToMono(ErrorResponseDto.class)
+                .flatMap(responseDto -> Mono.error(new ErrorResponseException(responseDto)));
+        }
+        return Mono.just(clientResponse);
     }
 }
