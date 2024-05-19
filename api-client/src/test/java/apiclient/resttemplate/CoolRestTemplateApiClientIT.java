@@ -1,5 +1,6 @@
 package apiclient.resttemplate;
 
+import apiclient.ApiClient;
 import apiclient.dto.RequestDto;
 import apiclient.dto.ResponseDto;
 import apiclient.exceptions.ErrorResponseException;
@@ -8,6 +9,7 @@ import apiclient.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 public class CoolRestTemplateApiClientIT {
     @Autowired
-    private CoolRestTemplateApiClient apiClient;
+    @Qualifier("coolRestTemplateApiClient")
+    private ApiClient apiClient;
 
     @Nested
     class FetchResource {
