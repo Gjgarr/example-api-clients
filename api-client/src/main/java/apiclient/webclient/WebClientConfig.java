@@ -25,16 +25,17 @@ public class WebClientConfig {
 
     @Bean
     public WebClient coolWebClient(@Value("${externalApi.url}" + "${externalApi.path}") String baseUrl,
-                                   ApiKeyService apiKeyService) {
+                                   ApiKeyService apiKeyService,
+                                   ObjectMapper objectMapper) {
         var httpClient = HttpClient.create().responseTimeout(Duration.ofSeconds(30L));
 
-        var objectMapper = new ObjectMapper()
+        var snakeMapper = objectMapper.copy()
             .setPropertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy());
 
         var strategies = ExchangeStrategies.builder()
             .codecs(configurer -> {
-                configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper));
-                configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper));
+                configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(snakeMapper));
+                configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(snakeMapper));
             })
             .build();
 

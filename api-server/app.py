@@ -21,6 +21,7 @@ class CreateResourceRequest:
 class Resource:
     user_id: int
     first_name: str
+    unknown_field: str = "foo"
 
 
 @dataclass
@@ -28,6 +29,7 @@ class BadRequest:
     status_code: int
     error_code: str
     message: str
+    unknown_field: str = "bar"
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

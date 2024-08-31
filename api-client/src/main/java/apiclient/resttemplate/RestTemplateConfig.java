@@ -18,8 +18,9 @@ import java.time.Duration;
 public class RestTemplateConfig {
     @Bean
     public RestTemplate coolRestTemplate(@Value("${externalApi.url}" + "${externalApi.path}") String baseUrl,
-                                         ApiKeyService apiKeyService) {
-        var objectMapper = new ObjectMapper()
+                                         ApiKeyService apiKeyService,
+                                         ObjectMapper objectMapper) {
+        var snakeMapper = objectMapper.copy()
             .setPropertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy());
 
         return new RestTemplateBuilder()
@@ -29,12 +30,12 @@ public class RestTemplateConfig {
             // Base URL
             .rootUri(baseUrl)
             // casing
-            .messageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
+            .messageConverters(new MappingJackson2HttpMessageConverter(snakeMapper))
             // headers
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             // Error handler
-            .errorHandler(new ErrorHandler(objectMapper))
+            .errorHandler(new ErrorHandler(snakeMapper))
             // Auth
             .interceptors(new AuthRequestInterceptor(apiKeyService))
             .build();

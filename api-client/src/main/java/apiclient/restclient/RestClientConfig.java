@@ -21,12 +21,13 @@ import java.time.Duration;
 public class RestClientConfig {
     @Bean
     public RestClient coolRestClient(@Value("${externalApi.url}" + "${externalApi.path}") String baseUrl,
-                                     ApiKeyService apiKeyService) {
+                                     ApiKeyService apiKeyService,
+                                     ObjectMapper objectMapper) {
         var factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofSeconds(30L));
         factory.setReadTimeout(Duration.ofSeconds(30L));
 
-        var objectMapper = new ObjectMapper()
+        var snakeMapper = objectMapper.copy()
             .setPropertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy());
 
         return RestClient.builder()
@@ -37,13 +38,13 @@ public class RestClientConfig {
             // casing
             .messageConverters(converters -> {
                 converters.clear();
-                converters.add(new MappingJackson2HttpMessageConverter(objectMapper));
+                converters.add(new MappingJackson2HttpMessageConverter(snakeMapper));
             })
             // headers
             .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             // Error handler
-            .defaultStatusHandler(new ErrorHandler(objectMapper))
+            .defaultStatusHandler(new ErrorHandler(snakeMapper))
             // Auth
             .requestInitializer(request -> apiKeyService.setApiKeyHeader(request.getHeaders()))
             .build();
