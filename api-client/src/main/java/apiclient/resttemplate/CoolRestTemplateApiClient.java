@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import static apiclient.enums.ErrorCode.*;
+import static apiclient.enums.ErrorCode.CONFLICTING;
+import static apiclient.enums.ErrorCode.NOT_FOUND;
 
 @Component
 public class CoolRestTemplateApiClient implements ApiClient {
