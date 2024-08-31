@@ -1,1 +1,1 @@
-litestar[standard]==2.10.0
+litestar[standard]==2.11.0
