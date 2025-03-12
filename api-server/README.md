@@ -3,7 +3,7 @@
 
 ## Pre-requisites
 
-* Python 3.12
+* Python version defined in [.python-version](`./.python-version`)
 
 
 ## Install
